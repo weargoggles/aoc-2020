@@ -1,44 +1,35 @@
 use std::fs;
 use std::io::prelude::*;
-use util::application_root_dir;
+use util::data_file;
 use std::io::BufReader;
 use std::str::FromStr;
+use std::iter::Product;
+use itertools::Itertools;
 
 fn main() -> std::io::Result<()>{
-    let app_root = application_root_dir()?;
-    println!("application root: {:#?}", app_root);
-    let expenses_path = app_root.join("data").join("expenses.txt");
-    let file = fs::File::open(expenses_path)?;
+    let values = read_values()?;
+
+    let pair: Vec<i64> = values.clone().into_iter().combinations(2)
+        .filter(|v| v.iter().sum::<i64>() == 2020)
+        .map(|v| v.iter().product::<i64>())
+        .collect();
+
+    let triple: Vec<i64> = values.clone().into_iter().combinations(3)
+        .filter(|v| v.iter().sum::<i64>() == 2020)
+        .map(|v| v.iter().product::<i64>())
+        .collect();
+
+    println!("pair: {:#?}, triple: {:#?}", pair, triple);
+    Ok(())
+}
+
+fn read_values() -> std::io::Result<Vec<i64>> {
+    let file = data_file("expenses.txt")?;
     let values: Vec<i64> = BufReader::new(file)
         .lines()
         .map(Result::unwrap)
         .map(|s| i64::from_str(&s))
         .map(Result::unwrap)
         .collect();
-    let deduped = {
-        let mut cloned = values.clone();
-        cloned.dedup();
-        cloned
-    };
-
-    assert_eq!(deduped, values);
-
-    for i in values.iter() {
-        for j in values.iter() {
-            if i + j == 2020 {
-                println!("part 1: {}", i * j);
-            }
-        }
-    }
-
-    for i in values.iter() {
-        for j in values.iter() {
-            for k in values.iter() {
-                if i + j + k == 2020 {
-                    println!("part 2: {}", i * j * k);
-                }
-            }
-        }
-    }
-    Ok(())
+    Ok(values)
 }
