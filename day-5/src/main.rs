@@ -25,7 +25,7 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn pass_to_id(pass: String) -> i32 {
-    let pass_val = pass.chars().fold(0, |acc, item| {
+    pass.chars().fold(0, |acc, item| {
         acc << 1 | match item {
             'F' => 0,
             'B' => 1,
@@ -33,8 +33,7 @@ fn pass_to_id(pass: String) -> i32 {
             'R' => 1,
             _ => panic!("unexpected item in the bagging area"),
         }
-    });
-    pass_val
+    })
 }
 
 
