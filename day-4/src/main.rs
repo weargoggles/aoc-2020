@@ -36,11 +36,14 @@ fn main() -> anyhow::Result<()> {
     let valid_hair_colours = Regex::new(r"^#[0-9a-f]{6}$")?;
     let valid_eye_colours = Regex::new(r"^(amb|blu|brn|gry|grn|hzl|oth)$")?;
     let valid_passport_id = Regex::new(r"^[0-9]{9}$")?;
+    let year_between: fn(&str, &str) -> (fn(&str) -> bool) = |min, max| {
+        |year| year.len() == 4 && min <= year && max >= year
+    };
     let valid_part2: Vec<&Vec<(String, String)>> = valid_part1.into_iter().filter(|passport| {
         passport.into_iter().all(|field| {
             let (k, v) = field;
             match (k.as_str(), v.as_str()) {
-                ("byr", year) => year.len() == 4 && "1920" <= year && "2002" >= year,
+                ("byr", year) => year_between("1920", "2002")(year),
                 ("iyr", year) => year.len() == 4 && "2010" <= year && "2020" >= year,
                 ("eyr", year) => year.len() == 4 && "2020" <= year && "2030" >= year,
                 ("hgt", height) => {
